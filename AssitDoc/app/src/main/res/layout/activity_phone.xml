@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:padding="10dp"
     android:background="@drawable/main_header_selector"
-    tools:context="ma.ensa.www.assistdoc.HomeActivity">
+    tools:context=".HomeActivity">
 
     <ImageView
         android:id="@+id/imageView12"

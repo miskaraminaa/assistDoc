@@ -33,6 +33,14 @@ public class activity_sign_up extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            // User is already authenticated, so redirect to the MainActivityPatient (patient page)
+            startActivity(new Intent(activity_sign_up.this, MainActivityPatient.class));
+            finish();
+        }
+
         // UI elements
         emailText = findViewById(R.id.email_reg);
         passwordText = findViewById(R.id.password_reg);

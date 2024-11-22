@@ -30,7 +30,6 @@
     <string name="title_activity_map">Map</string>
 
 
-
     <string-array name="symptom_list">
         <item>SELECT SYMPTOM</item>
         <item>Anxiety</item>

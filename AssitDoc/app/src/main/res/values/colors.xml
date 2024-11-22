@@ -7,7 +7,6 @@
     <color name="black">#000000</color>
     <color name="basic">#34B7FF</color>
     <color name="red">#FFF50606</color>
-    <color name="grey">#FFB6B3B3</color>
     <color name="blue">#0267FF</color>
     <color name="blue2">#1B73F8</color>
 
@@ -21,4 +20,14 @@
     <color name="accent_500">#E91E63</color>
     <color name="ripple">#F06292</color>
     <color name="gradient_start_color">#4c84ff</color>
+
+
+
+
+
+
+    <color name="purple">#9868d3</color>
+    <color name="lightPurple">#f0e9fa</color>
+    <color name="darkPurple">#6735a4</color>
+    <color name="grey">#acacac</color>
 </resources>

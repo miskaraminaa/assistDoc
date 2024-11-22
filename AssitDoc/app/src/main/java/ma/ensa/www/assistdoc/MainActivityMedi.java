@@ -1,0 +1,135 @@
+package ma.ensa.www.assistdoc;
+
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+
+import java.util.Calendar;
+import java.util.List;
+
+import ma.ensa.www.assistdoc.dao.AppDatabase;
+import ma.ensa.www.assistdoc.dao.MedicamentDao;
+import ma.ensa.www.assistdoc.entities.Medicament;
+import ma.ensa.www.assistdoc.model.MedicationReminderReceiver;
+
+public class MainActivityMedi extends AppCompatActivity {
+    private EditText editNom, editDosage, editFrequence, editHeurePris;
+    private Button buttonAdd, buttonViewMeds;
+    private MedicamentDao medicamentDao;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main_medi);
+
+        // Initialiser les champs
+        editNom = findViewById(R.id.editNom);
+        editDosage = findViewById(R.id.editDosage);
+        editFrequence = findViewById(R.id.editFrequence);
+        editHeurePris = findViewById(R.id.editHeurePris);
+        buttonAdd = findViewById(R.id.buttonAdd);
+        buttonViewMeds = findViewById(R.id.buttonViewMeds);
+
+        // Obtenir l'instance DAO
+        AppDatabase database = AppDatabase.getDatabase(this);
+        medicamentDao = database.medicamentDao();
+
+        // Ajouter un médicament
+        buttonAdd.setOnClickListener(view -> {
+            String nom = editNom.getText().toString();
+            String dosage = editDosage.getText().toString();
+            String frequence = editFrequence.getText().toString();
+            String heurePris = editHeurePris.getText().toString();
+
+            if (nom.isEmpty() || dosage.isEmpty() || frequence.isEmpty() || heurePris.isEmpty()) {
+                Toast.makeText(MainActivityMedi.this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Medicament medicament = new Medicament();
+            medicament.setNom(nom);
+            medicament.setDosage(dosage);
+            medicament.setFrequence(frequence);
+            medicament.setHeurePris(heurePris);
+
+            new Thread(() -> {
+                medicamentDao.insert(medicament);
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivityMedi.this, "Médicament ajouté!", Toast.LENGTH_SHORT).show();
+                    loadMedications();
+                });
+            }).start();
+        });
+
+        // Voir les médicaments
+        buttonViewMeds.setOnClickListener(view -> {
+            Intent intent = new Intent(this, MedicationListActivity.class);
+            startActivity(intent);
+        });
+    }
+
+    // Cette méthode peut être utilisée pour charger les médicaments, mais elle est actuellement pour des fins de debug
+    private void loadMedications() {
+        new Thread(() -> {
+            List<Medicament> medications = medicamentDao.getAllMedicaments().getValue(); // Utilisation de LiveData
+            for (Medicament medicament : medications) {
+                Log.d("MainActivity", "Médicament: " + medicament.getNom());
+            }
+        }).start();
+    }
+
+    // Planifier les rappels pour chaque médicament
+    private void scheduleMedicationReminders(Medicament medicament) {
+        String[] times = medicament.getHeurePris().split(",");
+        for (String time : times) {
+            String formattedTime = time.trim();
+            String[] parts = formattedTime.split(":");
+            if (parts.length == 3) {
+                try {
+                    int hour = Integer.parseInt(parts[0]);
+                    int minute = Integer.parseInt(parts[1]);
+
+                    if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+                        scheduleMedicationReminder(hour, minute, medicament.getNom());
+                    }
+                } catch (NumberFormatException e) {
+                    Log.e("MainActivity", "Erreur de format pour l'heure: " + e.getMessage());
+                }
+            } else {
+                Log.e("MainActivity", "Format d'heure invalide pour " + medicament.getNom() + ": " + time);
+            }
+        }
+    }
+
+    // Programmer un rappel pour un médicament
+    private void scheduleMedicationReminder(int hour, int minute, String medicamentName) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, MedicationReminderReceiver.class);
+        intent.putExtra("medicament_name", medicamentName);
+        intent.putExtra("notification_type", "reminder"); // Type de notification
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, medicamentName.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+
+        if (calendar.getTimeInMillis() < System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1); // Si l'heure est déjà passée, planifier pour le jour suivant
+        }
+
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        Log.d("MainActivity", "Rappel programmé pour " + medicamentName + " à " + calendar.getTime());
+    }
+}
+

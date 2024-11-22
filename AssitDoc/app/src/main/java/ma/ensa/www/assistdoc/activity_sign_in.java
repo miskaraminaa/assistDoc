@@ -86,7 +86,7 @@ public class activity_sign_in extends AppCompatActivity {
                                     Log.d("TAG", "signInWithEmail:success");
                                     FirebaseUser user = mAuth.getCurrentUser();
                                     updateUI(user);
-                                    startActivity(new Intent(activity_sign_in.this, MainActivity.class));
+                                    startActivity(new Intent(activity_sign_in.this, MainActivityPatient.class));
                                 } else {
                                     // If sign in fails, display a message to the user.
                                     Log.w("TAG", "signInWithEmail:failure", task.getException());
@@ -169,7 +169,7 @@ public class activity_sign_in extends AppCompatActivity {
                                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                                     User user=documentSnapshot.toObject(User.class);
                                     if(user.getType().equals("Patient")){
-                                        Intent k = new Intent(activity_sign_in.this, MainActivity.class);
+                                        Intent k = new Intent(activity_sign_in.this, MainActivityPatient.class);
                                         startActivity(k);
                                     }/*else{
                                         Intent k = new Intent(activity_sign_in.this, DoctorHomeActivity.class);
@@ -182,7 +182,7 @@ public class activity_sign_in extends AppCompatActivity {
 
 
                         } /*else {
-                            Intent k = new Intent(MainActivity.this, FirstSigninActivity.class);
+                            Intent k = new Intent(MainActivityPatient.this, FirstSigninActivity.class);
                             startActivity(k);
                         }*/
                     }

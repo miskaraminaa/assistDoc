@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
@@ -31,8 +33,13 @@
                 android:title="Contact Us" />
         </menu>
     </item>
+    <!-- Ajout du nouvel item "Prise de Médicaments" -->
+    <item
+        android:id="@+id/nav_medication"
+        android:icon="@drawable/medication_icon"
+        android:title="Prise de Médicaments" />
 
-    <!-- Ajouter l'option Logout -->
+    <!-- Ajout du item Logout -->
     <item
         android:id="@+id/logout"
         android:icon="@drawable/logout_icon"

@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ma.ensa.www.assistdoc">
 
-
     <uses-feature
         android:name="android.hardware.telephony"
         android:required="false" />
@@ -14,8 +13,10 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -24,9 +25,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".MainActivityMedi"
+            />
+        <activity
             android:name=".ActivityContactUs"
             android:screenOrientation="portrait"
             android:theme="@style/contact_us_theme" />
+        <activity
+            android:name=".MedicationListActivity"
+            android:screenOrientation="portrait" />
+
+        <receiver
+            android:name=".model.MedicationReminderReceiver"
+            android:exported="true" />
+
         <activity
             android:name=".activity_disease"
             android:screenOrientation="portrait"
@@ -76,14 +88,14 @@
             android:screenOrientation="portrait"
             android:theme="@style/standardtheme" />
         <activity
-            android:name=".MainActivity"
+            android:name=".MainActivityPatient"
             android:screenOrientation="portrait"
             android:theme="@style/home_theme" />
         <activity
             android:name=".home"
+            android:exported="true"
             android:screenOrientation="portrait"
-            android:theme="@style/home_theme"
-            android:exported="true">
+            android:theme="@style/home_theme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -98,6 +110,5 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
     </application>
-
 
 </manifest>
