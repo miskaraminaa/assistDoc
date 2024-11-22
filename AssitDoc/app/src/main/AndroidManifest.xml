@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="ma.ensa.www.assistdoc">
+
 
     <uses-feature
         android:name="android.hardware.telephony"
@@ -22,7 +24,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activity_contact_us"
+            android:name=".ActivityContactUs"
             android:screenOrientation="portrait"
             android:theme="@style/contact_us_theme" />
         <activity

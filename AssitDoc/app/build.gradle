@@ -1,17 +1,19 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
+
 android {
-    compileSdkVersion 34
-    buildToolsVersion "33.0.0" // Si 34.0.0 reste corrompu, utilisez une version stable
+    namespace 'ma.ensa.www.assistdoc'
+
+    compileSdk 34 // `compileSdkVersion` est remplacé par `compileSdk`
+
     defaultConfig {
-        applicationId "com.www.mediconsult"
-        minSdkVersion 24
-        targetSdkVersion 34
+        applicationId "ma.ensa.www.assistdoc"
+        minSdk 24 // `minSdkVersion` est remplacé par `minSdk`
+        targetSdk 34 // `targetSdkVersion` est remplacé par `targetSdk`
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
 
     buildTypes {
         release {
@@ -19,24 +21,24 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    namespace 'com.ndkapp.www.mediconsult'
-
 }
+
 dependencies {
     // Bibliothèques essentielles
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.4.1' // Version mise à jour
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4' // Version mise à jour
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     // Material Design
-    implementation ("com.google.android.material:material:1.9.0")// Version mise à jour
+    implementation 'com.google.android.material:material:1.9.0'
 
-    // Navigation Component
-    implementation 'androidx.navigation:navigation-fragment:2.5.3'
-    implementation 'androidx.navigation:navigation-ui:2.5.3'
+    // Navigation Component (Utilisation des artefacts KTX pour plus de simplicité)
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
 
-    // Cycle de vie (Lifecycle)
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0' // Version mise à jour
+    // Cycle de vie (Lifecycle) - Extensions obsolètes remplacées
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
 
     // Annotations
     implementation 'androidx.annotation:annotation:1.5.0'
@@ -46,19 +48,28 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:21.0.1'
     implementation 'com.google.android.gms:play-services-auth:20.6.0'
 
-    // Firebase (versions cohérentes)
-    implementation platform('com.google.firebase:firebase-bom:32.1.0') // Gestion centralisée des versions
-    implementation 'com.google.firebase:firebase-analytics'
-    implementation 'com.google.firebase:firebase-auth'
-    implementation 'com.google.firebase:firebase-database'
-    implementation 'com.google.firebase:firebase-firestore'
+    // Firebase (versions cohérentes avec Firebase BoM)
+    implementation platform('com.google.firebase:firebase-bom:32.1.0')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-auth-ktx'
+    implementation 'com.google.firebase:firebase-database-ktx'
+    implementation 'com.google.firebase:firebase-firestore-ktx'
 
     // Bibliothèques tierces
-    implementation 'com.airbnb.android:lottie:6.0.0' // Version mise à jour
+    implementation 'com.airbnb.android:lottie:6.0.0'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'androidx.activity:activity-ktx:1.7.2'
 
     // Tests
-    testImplementation 'junit:junit:4.13.2' // Version mise à jour
-    androidTestImplementation 'androidx.test:runner:1.5.2' // Version mise à jour
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+
+// Résolution des conflits liés aux dépendances Kotlin
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.10'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10'
+    }
 }

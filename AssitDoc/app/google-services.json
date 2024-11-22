@@ -7,38 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:388037631797:android:e8bd50298d952b581cf67c",
+        "mobilesdk_app_id": "1:388037631797:android:95274e0a1971f2831cf67c",
         "android_client_info": {
-          "package_name": "com.ndkapp.www"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "388037631797-8crac0el55clgnhdqd7ck71gnllcm7ts.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBZxrqpNrf8LgU6wQPUnrWv1aTLJn8YfyA"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "388037631797-8crac0el55clgnhdqd7ck71gnllcm7ts.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:388037631797:android:9696e494f84abea41cf67c",
-        "android_client_info": {
-          "package_name": "com.www.mediconsult"
+          "package_name": "ma.ensa.www.assistdoc"
         }
       },
       "oauth_client": [
