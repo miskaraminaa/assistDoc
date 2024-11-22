@@ -107,7 +107,7 @@
         android:id="@+id/sign_up"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Don't remember password? Click here"
+        android:text="Already have an account? Click here"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
         android:textColor="#7D32A8"

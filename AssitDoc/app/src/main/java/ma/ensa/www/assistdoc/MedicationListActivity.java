@@ -9,7 +9,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
-
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,11 +22,12 @@ import ma.ensa.www.assistdoc.entities.Medicament;
 
 public class MedicationListActivity extends AppCompatActivity {
 
-    private Button button;
+    private Button buttonAddMedication;
     private RecyclerView recyclerView;
     private MedicationAdapter medicationAdapter;
     private SearchView searchView;
     private MedicamentDao medicamentDao;
+    private List<Medicament> allMedications; // Liste complète des médicaments
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,23 +38,28 @@ public class MedicationListActivity extends AppCompatActivity {
         setupRecyclerView();
         setupSearchView();
 
-        // Initialisation de la base de données Room
+        // Récupérer l'accès à la base de données
         AppDatabase db = AppDatabase.getDatabase(this);
         medicamentDao = db.medicamentDao();
 
-        // Observer les médicaments
+        // Observer les changements de données dans la base
         medicamentDao.getAllMedicaments().observe(this, new Observer<List<Medicament>>() {
             @Override
             public void onChanged(List<Medicament> medications) {
+                allMedications = medications; // Mise à jour de la liste complète
                 medicationAdapter.updateList(medications);
             }
         });
 
-        button.setOnClickListener(view -> startActivity(new Intent(this, MainActivityPatient.class)));
+        // Gestion du bouton pour ajouter un médicament
+        buttonAddMedication.setOnClickListener(view -> {
+            Intent intent = new Intent(this, MainActivityMedi.class);
+            startActivity(intent);
+        });
     }
 
     private void initializeViews() {
-        button = findViewById(R.id.buttonAddMedication);
+        buttonAddMedication = findViewById(R.id.buttonAddMedication);
         recyclerView = findViewById(R.id.recyclerViewMeds);
         searchView = findViewById(R.id.search_button);
     }
@@ -69,16 +74,30 @@ public class MedicationListActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                medicationAdapter.getFilter().filter(query);
+                if (allMedications != null) {
+                    filterMedications(query);
+                }
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                medicationAdapter.getFilter().filter(newText);
+                if (allMedications != null) {
+                    filterMedications(newText);
+                }
                 return true;
             }
         });
+    }
+
+    private void filterMedications(String query) {
+        List<Medicament> filteredList = new ArrayList<>();
+        for (Medicament medicament : allMedications) {
+            if (medicament.getNom().toLowerCase().contains(query.toLowerCase())) {
+                filteredList.add(medicament);
+            }
+        }
+        medicationAdapter.updateList(filteredList);
     }
 
     private void confirmDelete(int position) {
@@ -88,22 +107,16 @@ public class MedicationListActivity extends AppCompatActivity {
                 .setPositiveButton("Oui", (dialog, which) -> {
                     Medicament medicamentToDelete = medicationAdapter.getMedications().get(position);
                     deleteMedicament(medicamentToDelete);
-                    medicationAdapter.removeAt(position);
                 })
                 .setNegativeButton("Non", null)
                 .show();
     }
 
     private void deleteMedicament(Medicament medicament) {
-        // Suppression du médicament de la base de données Room
-        new Thread(() -> medicamentDao.delete(medicament)).start();
-
-        // Supprimer le médicament du serveur ou effectuer d'autres actions nécessaires
-        sendNotificationToReceiver(medicament);
-    }
-
-    private void sendNotificationToReceiver(Medicament medicament) {
-        // Logique d'envoi de notification
-        Toast.makeText(this, "Notification pour " + medicament.getNom(), Toast.LENGTH_SHORT).show();
+        // Supprimer le médicament dans un thread séparé
+        new Thread(() -> {
+            medicamentDao.delete(medicament);
+            runOnUiThread(() -> Toast.makeText(this, "Médicament supprimé", Toast.LENGTH_SHORT).show());
+        }).start();
     }
 }

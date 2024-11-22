@@ -11,7 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.lifecycle.Observer;
 
 import java.util.Calendar;
 import java.util.List;
@@ -63,9 +63,11 @@ public class MainActivityMedi extends AppCompatActivity {
 
             new Thread(() -> {
                 medicamentDao.insert(medicament);
+
                 runOnUiThread(() -> {
                     Toast.makeText(MainActivityMedi.this, "Médicament ajouté!", Toast.LENGTH_SHORT).show();
                     loadMedications();
+                    scheduleMedicationReminders(medicament); // Planification des rappels
                 });
             }).start();
         });
@@ -75,25 +77,31 @@ public class MainActivityMedi extends AppCompatActivity {
             Intent intent = new Intent(this, MedicationListActivity.class);
             startActivity(intent);
         });
+
+        // Charger les médicaments au démarrage
+        loadMedications();
     }
 
-    // Cette méthode peut être utilisée pour charger les médicaments, mais elle est actuellement pour des fins de debug
     private void loadMedications() {
-        new Thread(() -> {
-            List<Medicament> medications = medicamentDao.getAllMedicaments().getValue(); // Utilisation de LiveData
-            for (Medicament medicament : medications) {
-                Log.d("MainActivity", "Médicament: " + medicament.getNom());
+        // Observer les médicaments depuis le thread principal
+        medicamentDao.getAllMedicaments().observe(this, new Observer<List<Medicament>>() {
+            @Override
+            public void onChanged(List<Medicament> medications) {
+                // Mettez à jour l'adaptateur ici
+                Log.d("MainActivity", "Nombre de médicaments : " + medications.size());
+                for (Medicament medicament : medications) {
+                    Log.d("MainActivity", "Médicament: " + medicament.getNom());
+                }
             }
-        }).start();
+        });
     }
 
-    // Planifier les rappels pour chaque médicament
     private void scheduleMedicationReminders(Medicament medicament) {
         String[] times = medicament.getHeurePris().split(",");
         for (String time : times) {
             String formattedTime = time.trim();
             String[] parts = formattedTime.split(":");
-            if (parts.length == 3) {
+            if (parts.length == 2) {
                 try {
                     int hour = Integer.parseInt(parts[0]);
                     int minute = Integer.parseInt(parts[1]);
@@ -110,14 +118,18 @@ public class MainActivityMedi extends AppCompatActivity {
         }
     }
 
-    // Programmer un rappel pour un médicament
     private void scheduleMedicationReminder(int hour, int minute, String medicamentName) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, MedicationReminderReceiver.class);
         intent.putExtra("medicament_name", medicamentName);
-        intent.putExtra("notification_type", "reminder"); // Type de notification
+        intent.putExtra("notification_type", "reminder");
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, medicamentName.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this,
+                medicamentName.hashCode(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, hour);
@@ -125,11 +137,10 @@ public class MainActivityMedi extends AppCompatActivity {
         calendar.set(Calendar.SECOND, 0);
 
         if (calendar.getTimeInMillis() < System.currentTimeMillis()) {
-            calendar.add(Calendar.DAY_OF_YEAR, 1); // Si l'heure est déjà passée, planifier pour le jour suivant
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
 
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
         Log.d("MainActivity", "Rappel programmé pour " + medicamentName + " à " + calendar.getTime());
     }
 }
-
