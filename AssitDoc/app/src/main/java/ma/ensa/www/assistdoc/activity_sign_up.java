@@ -5,8 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,7 +24,9 @@ public class activity_sign_up extends AppCompatActivity {
     private FirebaseFirestore db;
 
     private EditText emailText, passwordText, nameText;
-    private Button signUpBtn;
+    private Button signUpBtn ;
+    private TextView signIn;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +50,14 @@ public class activity_sign_up extends AppCompatActivity {
         passwordText = findViewById(R.id.password_reg);
         signUpBtn = findViewById(R.id.reg_btn);
 
+        signIn = findViewById(R.id.sign_up);
+
+        signIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(activity_sign_up.this, activity_sign_in.class));
+            }
+        });
         signUpBtn.setOnClickListener(v -> {
             String email = emailText.getText().toString();
             String password = passwordText.getText().toString();

@@ -24,10 +24,10 @@
     <!-- Logo Image -->
     <ImageView
         android:id="@+id/logo"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_marginTop="8dp"
-        android:src="@drawable/logo"
+        android:src="@drawable/rb_198"
         app:layout_constraintTop_toBottomOf="@id/topBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -107,7 +107,7 @@
         android:id="@+id/sign_up"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Already have an account? Click here"
+        android:text="Don't have an account? Click here"
         android:layout_marginTop="8dp"
         android:textSize="14sp"
         android:textColor="#7D32A8"
