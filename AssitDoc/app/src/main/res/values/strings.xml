@@ -1,11 +1,10 @@
 <resources>
-    <string name="app_name">MEDI CONSULT</string>
+    <string name="app_name">AssistDoc</string>
     <string name="title_activity_main">main</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
@@ -28,6 +27,13 @@
     <string name="login_failed">"Login failed"</string>
     <string name="contact">contact</string>
     <string name="title_activity_map">Map</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="enter_all_fields">Please enter all fields</string>
+    <string name="logged_out_successfully">Logged out successfully</string>
+    <string name="share_using">Share using</string>
+
 
 
     <string-array name="symptom_list">
@@ -89,6 +95,7 @@
     <string name="next">NEXT</string>
     <string name="doc_verif">Enter the code</string>
     <string name="buttom_doc">SUBMIT</string>
+    <!-- TODO: Remove or change this placeholder text -->
 
 
 </resources>

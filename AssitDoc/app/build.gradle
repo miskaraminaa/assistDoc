@@ -1,15 +1,18 @@
-apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+    id 'androidx.navigation.safeargs'
+}
 
 android {
     namespace 'ma.ensa.www.assistdoc'
 
-    compileSdk 34 // `compileSdkVersion` est remplacé par `compileSdk`
+    compileSdk 34
 
     defaultConfig {
         applicationId "ma.ensa.www.assistdoc"
-        minSdk 24 // `minSdkVersion` est remplacé par `minSdk`
-        targetSdk 34 // `targetSdkVersion` est remplacé par `targetSdk`
+        minSdk 24
+        targetSdk 34
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -21,9 +24,20 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+
+    dataBinding {
+        enabled = true
+    }
+
 }
 
+
+
 dependencies {
+    // ViewBinding
+    implementation 'androidx.databinding:databinding-runtime:7.0.0'
+
     // Bibliothèques essentielles
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.4.1'
@@ -32,23 +46,15 @@ dependencies {
     // Material Design
     implementation 'com.google.android.material:material:1.9.0'
 
-    // Navigation Component (Utilisation des artefacts KTX pour plus de simplicité)
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
+    // Navigation Component
+    implementation "androidx.navigation:navigation-fragment-ktx:2.7.0"
+    implementation "androidx.navigation:navigation-ui-ktx:2.7.0"
 
-    // Cycle de vie (Lifecycle) - Extensions obsolètes remplacées
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
 
-    // Annotations
-    implementation 'androidx.annotation:annotation:1.5.0'
+    implementation 'com.google.android.gms:play-services-auth:20.5.0'
 
-    // Play Services
-    implementation 'com.google.android.gms:play-services-maps:18.0.2'
-    implementation 'com.google.android.gms:play-services-location:21.0.1'
-    implementation 'com.google.android.gms:play-services-auth:20.6.0'
 
-    // Firebase (versions cohérentes avec Firebase BoM)
+    // Firebase
     implementation platform('com.google.firebase:firebase-bom:32.1.0')
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-auth-ktx'
@@ -58,22 +64,26 @@ dependencies {
     // Bibliothèques tierces
     implementation 'com.airbnb.android:lottie:6.0.0'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
-    implementation 'androidx.activity:activity-ktx:1.7.2'
-    implementation 'androidx.activity:activity:1.9.3'
 
-
-    implementation "androidx.room:room-runtime:2.5.0"
+    // Glide
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
     implementation 'androidx.room:room-common:2.6.1'
-    annotationProcessor "androidx.room:room-compiler:2.5.0" // pour Java
+    implementation 'androidx.room:room-runtime:2.6.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
 
+    // Lifecycle components
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-common-java8:2.6.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+    implementation 'androidx.activity:activity-ktx:1.7.0'
 
     // Tests
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    annotationProcessor 'androidx.room:room-compiler:2.6.1'
 }
 
-// Résolution des conflits liés aux dépendances Kotlin
 configurations.all {
     resolutionStrategy {
         force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.10'

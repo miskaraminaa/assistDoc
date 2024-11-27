@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import ma.ensa.www.assistdoc.model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -31,6 +30,8 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import ma.ensa.www.assistdoc.model.Users;
 
 public class activity_sign_in extends AppCompatActivity {
     private static int RC_SIGN_IN = 100;
@@ -167,7 +168,7 @@ public class activity_sign_in extends AppCompatActivity {
                             UsersRef.document(currentUser.getEmail()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                 @Override
                                 public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                    User user=documentSnapshot.toObject(User.class);
+                                    Users user=documentSnapshot.toObject(Users.class);
                                     if(user.getType().equals("Patient")){
                                         Intent k = new Intent(activity_sign_in.this, MainActivityPatient.class);
                                         startActivity(k);

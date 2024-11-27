@@ -11,6 +11,15 @@
     tools:openDrawer="start"
     android:background="@color/white">
 
+    <fragment
+        android:id="@+id/nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/nav_graph" />
+
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -20,30 +29,24 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:elevation="10dp"
-            android:theme="@style/AppTheme.NoActionBar"
-            app:popupTheme="@style/Theme.AppCompat.Light"
+            android:background="@color/darkPurple"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            android:elevation="4dp"
             tools:ignore="MissingConstraints">
 
 
+
+            <ImageView
+                android:id="@+id/chat_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:padding="8dp"
+                android:src="@drawable/ic_chat"
+                app:tint="@android:color/white" />
         </androidx.appcompat.widget.Toolbar>
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="166dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="2dp"
-            android:fontFamily="sans-serif"
-            android:text="Medi Consult"
-            android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textSize="24sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.189"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/toolbar"
-            app:layout_constraintVertical_bias="0.013" />
+
 
         <EditText
             android:id="@+id/nametext"
@@ -83,7 +86,6 @@
             android:id="@+id/agetext"
             android:layout_width="224dp"
             android:layout_height="49dp"
-
             android:layout_marginEnd="12dp"
             android:ems="10"
             android:hint="@string/main_age"
