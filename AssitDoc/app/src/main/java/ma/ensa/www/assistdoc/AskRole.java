@@ -73,41 +73,45 @@ public class AskRole extends AppCompatActivity {
 
     }
     private void showChangeLanguageDialog() {
-        final String[] listItems = {"French","English"};
+        final String[] listItems = {"French", "English"};
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(AskRole.this);
         mBuilder.setTitle("Choose Language...");
-        mBuilder.setSingleChoiceItems(listItems, -1, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if(i==0){
-                    n=0;
+        mBuilder.setSingleChoiceItems(listItems, -1, (dialogInterface, i) -> {
+            switch (i) {
+                case 0: // French
+                    n = 0;
                     setLocale("fr");
-                    recreate();
-                }else if(i==1){
-                    n=1;
+                    break;
+                case 1: // English
+                    n = 1;
                     setLocale("en");
-                    recreate();
-                }
-                dialogInterface.dismiss();
+                    break;
             }
+            recreate(); // Redémarrer l'activité pour appliquer les changements
+            dialogInterface.dismiss(); // Fermer la boîte de dialogue
         });
+
         AlertDialog mDialog = mBuilder.create();
         mDialog.show();
     }
 
-    public int langue(){
+    public int getSelectedLanguageIndex() {
         return n;
     }
+
     private void setLocale(String lang) {
         Locale locale = new Locale(lang);
         Locale.setDefault(locale);
+
         Configuration config = new Configuration();
-        config.locale = locale;
-        getBaseContext().getResources().updateConfiguration(config,getBaseContext().getResources().getDisplayMetrics());
-        SharedPreferences.Editor editor = getSharedPreferences("Settings",MODE_PRIVATE).edit();
-        editor.putString("My_Lang",lang);
+        // API 24 et supérieur
+        config.setLocale(locale);
+
+        getBaseContext().getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
+
+        // Sauvegarder la préférence de langue
+        SharedPreferences.Editor editor = getSharedPreferences("Settings", MODE_PRIVATE).edit();
+        editor.putString("My_Lang", lang);
         editor.apply();
     }
-
-
 }
