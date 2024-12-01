@@ -13,7 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import ma.ensa.www.assistdoc.model.Users;
+import ma.ensa.www.assistdoc.model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -40,7 +40,7 @@ public class activity_sign_in extends AppCompatActivity {
     private Button loginBtn;
     private  TextView signUp;
     FirebaseFirestore  db = FirebaseFirestore.getInstance();
-    private CollectionReference UsersRef = db.collection("Users");
+    private CollectionReference UsersRef = db.collection("User");
 
     GoogleSignInClient mGoogleSignInClient;
 
@@ -77,7 +77,6 @@ public class activity_sign_in extends AppCompatActivity {
                 String email=emailText.getText().toString();
                 String password=passwordText.getText().toString();
                 if(!email.isEmpty() && !password.isEmpty() ){
-
                 mAuth.signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener(activity_sign_in.this, new OnCompleteListener<AuthResult>() {
                             @Override
@@ -168,7 +167,7 @@ public class activity_sign_in extends AppCompatActivity {
                             UsersRef.document(currentUser.getEmail()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                 @Override
                                 public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                    Users user=documentSnapshot.toObject(Users.class);
+                                    User user=documentSnapshot.toObject(User.class);
                                     if(user.getType().equals("Patient")){
                                         Intent k = new Intent(activity_sign_in.this, MainActivityPatient.class);
                                         startActivity(k);

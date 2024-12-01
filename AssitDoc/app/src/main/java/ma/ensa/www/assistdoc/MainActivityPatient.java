@@ -12,125 +12,141 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivityPatient extends AppCompatActivity {
-    Toolbar t;
-    DrawerLayout drawer;
-    EditText nametext;
-    EditText agetext;
-    ImageView enter;
-    RadioButton male;
-    RadioButton female;
-    RadioGroup rg;
-    FirebaseAuth mAuth; // Declare FirebaseAuth here
+
+    private Toolbar t;
+    private DrawerLayout drawer;
+    private EditText nametext, agetext;
+    private ImageView enter, chatIcon;
+    private RadioButton male, female;
+    private RadioGroup rg;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_patient);
 
-        // Initialize views and FirebaseAuth
+        // Initialisation des vues
+        initializeViews();
+
+        // Configuration de FirebaseAuth
+        mAuth = FirebaseAuth.getInstance();
+
+        // Configuration de la toolbar et du navigation drawer
+        setupToolbarAndDrawer();
+
+        // Récupération du NavController
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+
+        // Listener pour l'icône de chat
+        chatIcon.setOnClickListener(view -> navController.navigate(R.id.chatFragment));
+
+        // Listener pour le bouton "enter"
+        enter.setOnClickListener(view -> navigateToSymptomsActivity());
+
+        // Listener pour les items du NavigationView
+        setupNavigationView(navController);
+    }
+
+    private void initializeViews() {
         drawer = findViewById(R.id.draw_activity);
         t = findViewById(R.id.toolbar);
         nametext = findViewById(R.id.nametext);
         agetext = findViewById(R.id.agetext);
         enter = findViewById(R.id.imageView7);
+        chatIcon = findViewById(R.id.chat_icon);
         male = findViewById(R.id.male);
         female = findViewById(R.id.female);
         rg = findViewById(R.id.rg1);
-        mAuth = FirebaseAuth.getInstance(); // Initialize FirebaseAuth here
+    }
 
-        // Set up navigation drawer
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, t, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+    private void setupToolbarAndDrawer() {
+        setSupportActionBar(t);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, t, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+    }
 
+    private void setupNavigationView(NavController navController) {
         NavigationView nav = findViewById(R.id.nav_view);
+        NavigationUI.setupWithNavController(nav, navController);
 
-        enter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String name = nametext.getText().toString();
-                String age = agetext.getText().toString();
-                String gender = "";
-                int id = rg.getCheckedRadioButtonId();
-                switch(id) {
-                    case R.id.male:
-                        gender = "Mr.";
-                        break;
-                    case R.id.female:
-                        gender = "Ms.";
-                        break;
-                }
+        nav.setNavigationItemSelectedListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.nav_sos:
+                    startActivity(new Intent(MainActivityPatient.this, call.class));
+                    break;
 
-                // Passing data to the Symptoms activity
-                Intent symp = new Intent(MainActivityPatient.this, activity_symptoms.class);
-                symp.putExtra("name", name);
-                symp.putExtra("gender", gender);
-                startActivity(symp);
+                case R.id.nav_share:
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    startActivity(Intent.createChooser(shareIntent, getString(R.string.share_using)));
+                    break;
+
+                case R.id.nav_hosp:
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("https://www.google.com/maps/search/hospitals+near+me"));
+                    startActivity(mapIntent);
+                    break;
+
+                case R.id.nav_cntus:
+                    startActivity(new Intent(MainActivityPatient.this, ActivityContactUs.class));
+                    break;
+
+                case R.id.nav_medication:
+                    startActivity(new Intent(MainActivityPatient.this, MainActivityMedi.class));
+                    break;
+
+                case R.id.logout:
+                    signOut();
+                    break;
             }
-        });
-
-        // Set up navigation drawer item selection
-        nav.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.nav_sos:
-                        Intent in = new Intent(MainActivityPatient.this, call.class);
-                        startActivity(in);
-                        break;
-
-                    case R.id.nav_share:
-                        Intent myIntent = new Intent(Intent.ACTION_SEND);
-                        myIntent.setType("text/plain");
-                        startActivity(Intent.createChooser(myIntent, "SHARE USING"));
-                        break;
-
-                    case R.id.nav_hosp:
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW);
-                        browserIntent.setData(Uri.parse("https://www.google.com/maps/search/hospitals+near+me"));
-                        startActivity(browserIntent);
-                        break;
-
-                    case R.id.nav_cntus:
-                        Intent c_us = new Intent(MainActivityPatient.this, ActivityContactUs.class);
-                        startActivity(c_us);
-                        break;
-
-                    // Ajout du cas pour MedicationListActivity
-                    case R.id.nav_medication:
-                        Intent medicationIntent = new Intent(MainActivityPatient.this, MainActivityMedi.class);
-                        startActivity(medicationIntent);
-                        break;
-
-                    case R.id.logout:
-                        signOut(); // Handle sign out
-                        break;
-                }
-
-                drawer.closeDrawer(GravityCompat.START);
-                return true;
-            }
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
         });
     }
 
+    private void navigateToSymptomsActivity() {
+        String name = nametext.getText().toString().trim();
+        String age = agetext.getText().toString().trim();
+        String gender = "";
+
+        int selectedId = rg.getCheckedRadioButtonId();
+        if (selectedId == R.id.male) {
+            gender = "Mr.";
+        } else if (selectedId == R.id.female) {
+            gender = "Ms.";
+        }
+
+        if (name.isEmpty() || age.isEmpty()) {
+            Toast.makeText(this, getString(R.string.enter_all_fields), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent sympIntent = new Intent(MainActivityPatient.this, activity_symptoms.class);
+        sympIntent.putExtra("name", name);
+        sympIntent.putExtra("gender", gender);
+        startActivity(sympIntent);
+    }
+
     private void signOut() {
-        // Sign out from Firebase
         mAuth.signOut();
+        Toast.makeText(this, getString(R.string.logged_out_successfully), Toast.LENGTH_SHORT).show();
 
-        // Show a sign-out success message
-        Toast.makeText(MainActivityPatient.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
-
-        // Redirect to Sign-In Activity
         Intent logoutIntent = new Intent(MainActivityPatient.this, activity_sign_in.class);
         logoutIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(logoutIntent);

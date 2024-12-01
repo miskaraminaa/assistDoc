@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">MEDI CONSULT</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">AssistDoc</string>
 
     <string name="title_AskRole">Choix du Rôle</string>
     <string name="AskRole_doctor">Doctor</string>
@@ -25,8 +25,9 @@
     <string name="signup_condition">Veuillez accepter les conditions d\'utilisation</string>
     <string name="title_symptom">Entez vos Symptomes !</string>
     <string name="buttom_symptom">CONNAISSEZ VOTRE MALADIE</string>
-
-
+    <string name="enter_all_fields">Veuillez saisir tous les champs</string>
+    <string name="logged_out_successfully">Déconnexion réussite</string>
+    <string name="share_using">Partage utilisation</string>
 
     <string name="title_activity_main">main</string>
     <string name="title_home">Home</string>
