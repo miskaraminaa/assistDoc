@@ -8,16 +8,18 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import ma.ensa.www.assistdoc.adapter.MedicationAdapter;
-import ma.ensa.www.assistdoc.dao.AppDatabase;
-import ma.ensa.www.assistdoc.dao.MedicamentDao;
 import ma.ensa.www.assistdoc.entities.Medicament;
 
 public class MedicationListActivity extends AppCompatActivity {
@@ -26,8 +28,10 @@ public class MedicationListActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private MedicationAdapter medicationAdapter;
     private SearchView searchView;
-    private MedicamentDao medicamentDao;
     private List<Medicament> allMedications; // Liste complète des médicaments
+
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,18 +42,15 @@ public class MedicationListActivity extends AppCompatActivity {
         setupRecyclerView();
         setupSearchView();
 
-        // Récupérer l'accès à la base de données
-        AppDatabase db = AppDatabase.getDatabase(this);
-        medicamentDao = db.medicamentDao();
+        // Initialisation Firebase
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
-        // Observer les changements de données dans la base
-        medicamentDao.getAllMedicaments().observe(this, new Observer<List<Medicament>>() {
-            @Override
-            public void onChanged(List<Medicament> medications) {
-                allMedications = medications; // Mise à jour de la liste complète
-                medicationAdapter.updateList(medications);
-            }
-        });
+        // Récupérer l'UID de l'utilisateur authentifié
+        String userId = mAuth.getCurrentUser().getUid();
+
+        // Récupérer les médicaments de Firestore
+        fetchMedicationsFromFirestore(userId);
 
         // Gestion du bouton pour ajouter un médicament
         buttonAddMedication.setOnClickListener(view -> {
@@ -100,6 +101,27 @@ public class MedicationListActivity extends AppCompatActivity {
         medicationAdapter.updateList(filteredList);
     }
 
+    private void fetchMedicationsFromFirestore(String userId) {
+        // Récupérer les médicaments de la sous-collection "medicaments" sous l'utilisateur
+        db.collection("Users").document(userId).collection("medications")
+                .orderBy("nom", Query.Direction.ASCENDING)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Medicament> medications = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Medicament medicament = document.toObject(Medicament.class);
+                            medicament.setId(document.getId());  // Set the document ID to the Medicament object
+                            medications.add(medicament);
+                        }
+                        allMedications = medications;
+                        medicationAdapter.updateList(medications);
+                    } else {
+                        Toast.makeText(MedicationListActivity.this, "Erreur lors de la récupération des médicaments", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     private void confirmDelete(int position) {
         new AlertDialog.Builder(this)
                 .setTitle("Confirmation de suppression")
@@ -113,10 +135,18 @@ public class MedicationListActivity extends AppCompatActivity {
     }
 
     private void deleteMedicament(Medicament medicament) {
-        // Supprimer le médicament dans un thread séparé
-        new Thread(() -> {
-            medicamentDao.delete(medicament);
-            runOnUiThread(() -> Toast.makeText(this, "Médicament supprimé", Toast.LENGTH_SHORT).show());
-        }).start();
+        // Supprimer le médicament dans Firestore
+        String userId = mAuth.getCurrentUser().getUid();
+        db.collection("Users").document(userId)
+                .collection("medicaments")
+                .document(medicament.getId()) // Use the ID as the argument
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Médicament supprimé", Toast.LENGTH_SHORT).show();
+                    fetchMedicationsFromFirestore(userId); // Recharger la liste après suppression
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Erreur lors de la suppression du médicament", Toast.LENGTH_SHORT).show();
+                });
     }
 }

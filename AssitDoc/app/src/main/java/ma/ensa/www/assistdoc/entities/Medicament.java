@@ -1,14 +1,10 @@
 package ma.ensa.www.assistdoc.entities;
 
 
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
 
-@Entity(tableName = "medicaments")
 public class Medicament {
 
-    @PrimaryKey(autoGenerate = true)
-    private int id;
+    public String id;
     private String nom;
     private String dosage;
     private String frequence;
@@ -25,11 +21,11 @@ public class Medicament {
     }
 
     // Getters et setters
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

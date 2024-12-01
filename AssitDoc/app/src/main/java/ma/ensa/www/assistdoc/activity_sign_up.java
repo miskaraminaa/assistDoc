@@ -22,7 +22,6 @@ import java.util.Map;
 public class activity_sign_up extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-
     private EditText emailText, passwordText, nameText;
     private Button signUpBtn ;
     private TextView signIn;
@@ -37,10 +36,9 @@ public class activity_sign_up extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            // User is already authenticated, so redirect to the MainActivityPatient (patient page)
+            // Users is already authenticated, so redirect to the MainActivityPatient (patient page)
             startActivity(new Intent(activity_sign_up.this, MainActivityPatient.class));
             finish();
         }
@@ -75,15 +73,15 @@ public class activity_sign_up extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
-                        Log.d("SignUp", "User created: " + user.getUid());
+                        Log.d("SignUp", "Users created: " + user.getUid());
 
                         // Add user to Firestore
                         Map<String, Object> userData = new HashMap<>();
                         userData.put("email", email);
                         userData.put("type", "Patient"); // Default type
 
-                        db.collection("User").document(email).set(userData)
-                                .addOnSuccessListener(aVoid -> Log.d("Firestore", "User added to Firestore"))
+                        db.collection("Users").document(email).set(userData)
+                                .addOnSuccessListener(aVoid -> Log.d("Firestore", "Users added to Firestore"))
                                 .addOnFailureListener(e -> Log.e("Firestore", "Failed to add user", e));
 
                         Toast.makeText(activity_sign_up.this, "Sign-up successful!", Toast.LENGTH_SHORT).show();

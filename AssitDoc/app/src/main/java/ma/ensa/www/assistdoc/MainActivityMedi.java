@@ -1,5 +1,6 @@
 package ma.ensa.www.assistdoc;
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -11,20 +12,22 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 
 import java.util.Calendar;
 import java.util.List;
 
-import ma.ensa.www.assistdoc.dao.AppDatabase;
-import ma.ensa.www.assistdoc.dao.MedicamentDao;
 import ma.ensa.www.assistdoc.entities.Medicament;
 import ma.ensa.www.assistdoc.model.MedicationReminderReceiver;
 
 public class MainActivityMedi extends AppCompatActivity {
     private EditText editNom, editDosage, editFrequence, editHeurePris;
     private Button buttonAdd, buttonViewMeds;
-    private MedicamentDao medicamentDao;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +42,9 @@ public class MainActivityMedi extends AppCompatActivity {
         buttonAdd = findViewById(R.id.buttonAdd);
         buttonViewMeds = findViewById(R.id.buttonViewMeds);
 
-        // Obtenir l'instance DAO
-        AppDatabase database = AppDatabase.getDatabase(this);
-        medicamentDao = database.medicamentDao();
+        // Initialisation de Firebase
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
         // Ajouter un médicament
         buttonAdd.setOnClickListener(view -> {
@@ -61,15 +64,26 @@ public class MainActivityMedi extends AppCompatActivity {
             medicament.setFrequence(frequence);
             medicament.setHeurePris(heurePris);
 
-            new Thread(() -> {
-                medicamentDao.insert(medicament);
+            // Vérifier si l'utilisateur est authentifié
+            if (mAuth.getCurrentUser() != null) {
+                String userId = mAuth.getCurrentUser().getUid();
 
-                runOnUiThread(() -> {
-                    Toast.makeText(MainActivityMedi.this, "Médicament ajouté!", Toast.LENGTH_SHORT).show();
-                    loadMedications();
-                    scheduleMedicationReminders(medicament); // Planification des rappels
-                });
-            }).start();
+                // Ajouter le médicament à Firestore sous la collection de l'utilisateur
+                db.collection("Users")
+                        .document(userId)
+                        .collection("medications")
+                        .add(medicament)
+                        .addOnSuccessListener(documentReference -> {
+                            Toast.makeText(MainActivityMedi.this, "Médicament ajouté à Firebase!", Toast.LENGTH_SHORT).show();
+                            loadMedications(); // Optionnel: Charger les médicaments après ajout
+                            scheduleMedicationReminders(medicament); // Planification des rappels
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(MainActivityMedi.this, "Erreur lors de l'ajout du médicament", Toast.LENGTH_SHORT).show();
+                        });
+            } else {
+                Toast.makeText(MainActivityMedi.this, "Veuillez vous connecter pour ajouter des médicaments.", Toast.LENGTH_SHORT).show();
+            }
         });
 
         // Voir les médicaments
@@ -83,17 +97,29 @@ public class MainActivityMedi extends AppCompatActivity {
     }
 
     private void loadMedications() {
-        // Observer les médicaments depuis le thread principal
-        medicamentDao.getAllMedicaments().observe(this, new Observer<List<Medicament>>() {
-            @Override
-            public void onChanged(List<Medicament> medications) {
-                // Mettez à jour l'adaptateur ici
-                Log.d("MainActivity", "Nombre de médicaments : " + medications.size());
-                for (Medicament medicament : medications) {
-                    Log.d("MainActivity", "Médicament: " + medicament.getNom());
-                }
-            }
-        });
+        // Vérifier si l'utilisateur est authentifié
+        if (mAuth.getCurrentUser() != null) {
+            String userId = mAuth.getCurrentUser().getUid();
+
+            // Charger les médicaments depuis Firebase
+            db.collection("users")
+                    .document(userId)
+                    .collection("medications")
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        List<Medicament> medications = queryDocumentSnapshots.toObjects(Medicament.class);
+                        // Mettez à jour l'adaptateur ou affichez les médicaments ici
+                        Log.d("MainActivity", "Nombre de médicaments : " + medications.size());
+                        for (Medicament medicament : medications) {
+                            Log.d("MainActivity", "Médicament: " + medicament.getNom());
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("MainActivity", "Erreur lors du chargement des médicaments", e);
+                    });
+        } else {
+            Log.e("MainActivity", "Utilisateur non authentifié.");
+        }
     }
 
     private void scheduleMedicationReminders(Medicament medicament) {
@@ -118,6 +144,7 @@ public class MainActivityMedi extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("ScheduleExactAlarm")
     private void scheduleMedicationReminder(int hour, int minute, String medicamentName) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, MedicationReminderReceiver.class);
